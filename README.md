@@ -327,3 +327,170 @@ structure deploy my-todo-list
 If everything worked, you should see your hello world app live at `https://todo-list-<your-structure-username>.structure.sh/`.
 
 Something important to note is we did not have to run `npm install` anywhere. When you deploy your project to Structure, the server runs two processes. First it recursively searches your project for package.json files and runs `yarn install` for you. Then it runs `npm start` in your project root directory's `package.json`. Look back at the Express section, specifically our `package.json` we wrote, and note how we wrote our `npm start` command to build the client app then start the server.
+
+---
+
+# Part 4: Todo List Development
+
+At this point we have a fully functioning and live React/Express app hosted on Structure. This final part of the tutorial will focus on the development of our Todo list including Express API endpoints and React Components.
+
+### Express API
+
+We are going to develop API two endpoint with three functions (GET, POST, and DELETE).
+
+Let's create our mock database. This is just a variable we'll store on our server that will hold stare for our server. Normally this would be done with a database, but for the purpose of this tutorial, we will use a variable.
+
+Go ahead and paste the following in your `server.js` file before the `app.listen` line.
+
+```
+var todo_list = {
+  as4trsfd: {
+    title: "Wake up",
+    complete: true
+  },
+  k5icmwof: {
+    title: "Make a todo list",
+    complete: true
+  },
+  ka6mgjaf: {
+    title: "Deploy to Structure",
+    complete: true
+  },
+  aysgc5d5: {
+    title: "Sleep",
+    complete: false
+  },
+  kcos6ktov: {
+    title: "Repeat!",
+    complete: false
+  }
+};
+```
+
+##### /list GET
+
+Next we will create an API endpoint `/list`. This GET endpoint will simply return our `todo_list` object as a json object.
+
+```
+app.get("/list", function(req, res) {
+  res.json(todo_list);
+});
+```
+
+##### /list POST
+
+This API endpoint will create a 8 character random key and store an object for the new item inside our `todo_list` variable.
+
+```
+app.post("/list", function(req, res) {
+  const key = Math.random()
+    .toString(36)
+    .substr(2, 9);
+
+  const new_item = {
+    title: req.query.title,
+    complete: false
+  };
+
+  todo_list[key] = new_item;
+  res.json(new_item);
+});
+```
+
+##### /list DELETE
+
+This API endpoint will get the key of the item we are trying to delete and remove it from the `todo_list` object.
+
+```
+app.delete("/list", function(req, res) {
+  const key = req.query.key;
+  delete todo_list[key];
+  res.json(todo_list);
+});
+```
+
+##### /update-checkmark POST
+
+This API endpoint flips the state of a checkbox.
+
+```
+app.post("/update-checkmark", function(req, res) {
+  const key = req.query.key;
+  todo_list[key]["complete"] = !todo_list[key]["complete"];
+  res.json(todo_list);
+});
+```
+
+### Summary
+
+At this point your `server.js` file should look something like this.
+
+```
+const express = require("express");
+const path = require("path");
+const app = express();
+
+const port = process.env.PORT || 80;
+
+// Serve any static files
+app.use(express.static(path.join(__dirname, "client/dist")));
+
+app.get("/", function(req, res) {
+  res.sendFile(path.join(__dirname, "client/public", "index.html"));
+});
+
+var todo_list = {
+  as4trsfd: {
+    title: "Wake up",
+    complete: true
+  },
+  k5icmwof: {
+    title: "Make a todo list",
+    complete: true
+  },
+  ka6mgjaf: {
+    title: "Deploy to Structure",
+    complete: true
+  },
+  aysgc5d5: {
+    title: "Sleep",
+    complete: false
+  },
+  kcos6ktov: {
+    title: "Repeat!",
+    complete: false
+  }
+};
+
+app.get("/list", function(req, res) {
+  res.json(todo_list);
+});
+
+app.post("/list", function(req, res) {
+  const key = Math.random()
+    .toString(36)
+    .substr(2, 9);
+
+  const new_item = {
+    title: req.query.title,
+    complete: false
+  };
+
+  todo_list[key] = new_item;
+  res.json(new_item);
+});
+
+app.delete("/list", function(req, res) {
+  const key = req.query.key;
+  delete todo_list[key];
+  res.json(todo_list);
+});
+
+app.post("/update-checkmark", function(req, res) {
+  const key = req.query.key;
+  todo_list[key]["complete"] = !todo_list[key]["complete"];
+  res.json(todo_list);
+});
+
+app.listen(port, () => console.log(`Listening on port ${port}`));
+```
