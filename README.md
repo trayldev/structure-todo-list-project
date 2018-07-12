@@ -2,6 +2,12 @@
 
 This project was designed to help you build a small React/Express todo list project that you can expend on and deploy to [Structure](https://structure.sh). We will go through setting up React, WebPack, Babel, and Express from scratch. We will build a basic API with Express, which our React project will interact with.
 
+## Borrowed Resources
+
+React Starter Tutorial: https://blog.usejournal.com/creating-a-react-app-from-scratch-f3c693b84658
+
+# Part 1: Basic Hello World React App
+
 ## Environment Setup
 
 Let's start by installing . For this project, our only dependency is [Structure](https://structure.sh).
@@ -60,7 +66,7 @@ We will put the below html inside a new file called `index.html` inside our /pub
     <noscript>
       You need to enable JavaScript to run this app.
     </noscript>
-    <script src="../dist/bundle.js"></script>
+    <script src="../bundle.js"></script>
   </body>
 </html>
 ```
@@ -247,4 +253,63 @@ This returns a React component with the text "Hello World!" Notice the `export d
 
 **That's it!** We now have a basic react app ready to be run. Go ahead and run `npm start` and checkout `http://localhost:3030`.
 
-Note: If you are stuck on this at all, feel free to check out the code for this repository at https://github.com/trayldev/structure-todo-list-project and go to the commit `complete-hello-world-app`.
+Checkpoint: If you are stuck on this at all, feel free to check out the code for this repository at https://github.com/trayldev/structure-todo-list-project and go to the commit `complete-hello-world-app`.
+
+---
+
+# Part 2: Express Serve Content
+
+## Express
+
+Great! Now let's setup our express application.
+
+#### NPM
+
+The next portion of this tutorial is going to be in the root project folder. Mine is called `structure-todo-list-project`. Let's run `npm init` here.
+
+Install express with `npm install --save express`
+
+Paste this code into your package.json file in your project directory
+
+```
+{
+  "name": "server",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npm run client && npm run server",
+    "client": "cd client && npm run build && cd ..",
+    "server": "node server.js",
+    "dev": "export PORT=5000 npm run client && npm run server"
+  },
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}
+```
+
+#### Server
+
+Now create a file called `server.js` inside the project root directory. All this does is return the static files from your built react app.
+
+_Note:_ Structure requires your port to be **80** but we will use **5000** for development, set inside package.json under the dev command.
+
+```
+const express = require("express");
+const path = require("path");
+const app = express();
+
+const port = process.env.PORT || 80;
+
+// Serve any static files
+app.use(express.static(path.join(__dirname, "client/dist")));
+
+app.get("/", function(req, res) {
+  res.sendFile(path.join(__dirname, "client/public", "index.html"));
+});
+
+app.listen(port, () => console.log(`Listening on port ${port}`));
+```
+
+Now try running `npm run dev` from your project root directory and look at `http://localhost:5000`. You should see your React hello world app running there. In the next section we will work on deploying our React/Express hello world app to [Structure](https://structure.sh).
+
+Checkpoint: If you are stuck on this at all, feel free to check out the code for this repository at https://github.com/trayldev/structure-todo-list-project and go to the commit `complete-expess-server`.
