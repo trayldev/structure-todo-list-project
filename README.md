@@ -253,8 +253,6 @@ This returns a React component with the text "Hello World!" Notice the `export d
 
 **That's it!** We now have a basic react app ready to be run. Go ahead and run `npm start` and checkout `http://localhost:3030`.
 
-Checkpoint: If you are stuck on this at all, feel free to check out the code for this repository at https://github.com/trayldev/structure-todo-list-project and go to the commit `complete-hello-world-app`.
-
 ---
 
 # Part 2: Express Serve Content
@@ -312,4 +310,20 @@ app.listen(port, () => console.log(`Listening on port ${port}`));
 
 Now try running `npm run dev` from your project root directory and look at `http://localhost:5000`. You should see your React hello world app running there. In the next section we will work on deploying our React/Express hello world app to [Structure](https://structure.sh).
 
-Checkpoint: If you are stuck on this at all, feel free to check out the code for this repository at https://github.com/trayldev/structure-todo-list-project and go to the commit `complete-expess-server`.
+---
+
+# Part 3: Structure Deploy
+
+Now we will deploy to [Structure](https://structure.sh).
+
+Make sure you're already logged into Structure. [Instructions for CLI loggin can be found here](https://docs.structure.sh/getting-started-with-the-cli).
+
+Let's do this by running running
+
+```
+structure deploy my-todo-list
+```
+
+If everything worked, you should see your hello world app live at `https://todo-list-<your-structure-username>.structure.sh/`.
+
+Something important to note is we did not have to run `npm install` anywhere. When you deploy your project to Structure, the server runs two processes. First it recursively searches your project for package.json files and runs `yarn install` for you. Then it runs `npm start` in your project root directory's `package.json`. Look back at the Express section, specifically our `package.json` we wrote, and note how we wrote our `npm start` command to build the client app then start the server.
