@@ -393,7 +393,7 @@ app.post("/list", function(req, res) {
   };
 
   todo_list[key] = new_item;
-  res.json(new_item);
+  res.json(todo_list);
 });
 ```
 
@@ -462,8 +462,9 @@ var todo_list = {
   }
 };
 
-app.get("/list", function(req, res) {
-  res.json(todo_list);
+// API calls
+app.get("/list", (req, res) => {
+  res.send(todo_list);
 });
 
 app.post("/list", function(req, res) {
@@ -477,20 +478,254 @@ app.post("/list", function(req, res) {
   };
 
   todo_list[key] = new_item;
-  res.json(new_item);
+  res.send(new_item);
 });
 
 app.delete("/list", function(req, res) {
   const key = req.query.key;
   delete todo_list[key];
-  res.json(todo_list);
+  res.send(todo_list);
 });
 
 app.post("/update-checkmark", function(req, res) {
   const key = req.query.key;
   todo_list[key]["complete"] = !todo_list[key]["complete"];
-  res.json(todo_list);
+  res.send(todo_list);
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
 ```
+
+### React
+
+Now to the React! Let's start off by updating our App component.
+
+```
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { list: {} };
+  }
+
+  componentDidMount() {
+    fetch("/list")
+      .then(res => {
+        return res.json();
+      })
+      .then(list => {
+        this.setState({ list: list });
+      });
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <h1> TODO LIST </h1>
+
+        {Object.keys(this.state.list).map(key => {
+          return (
+            <CheckBoxItem
+              title={this.state.list[key].title}
+              checked={this.state.list[key].complete}
+              id={key}
+              key={key}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+}
+```
+
+What is this doing? Essentially, our `constructor` set's our component's state with an empty object called list. Then our `componentDidMount()` makes a request to our server asking for the the JSON object that the `/list` API endpoint returns. Finally, our render function displays some basic HTML. It also uses that `Object.keys()` function to get a list of keys in our list object (the ids of all the list items) and uses the `map` function to loop through those keys and return a `CheckBoxItem` for each key. We will create the CheckBoxItem component next. Notice that we pass the title, checked status, and id value as props down to our `CheckBoxItem`. The `key` word is used whenever we map through a list so the browser can differentiate between items in lists (helpful for browser accessibility tools like page readers).
+
+Next, let's create a component called CheckBoxItem. This will be a checkbox displayed next to a title for each todo item.
+
+```
+class CheckBoxItem extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { checked: this.props.checked };
+  }
+
+  checkboxClicked(event) {
+    this.setState({ checked: !this.state.checked });
+    // send POST to /update-checkbox/?key={this.props.id}
+    const url = "/update-checkmark/?key=" + this.props.id;
+    fetch(url, {
+      method: "POST"
+    });
+  }
+
+  render() {
+    return (
+      <div className="container">
+        <div className="checkbox">
+          {this.state.checked ? (
+            <input
+              type="checkbox"
+              onClick={event => this.checkboxClicked(event)}
+              checked
+            />
+          ) : (
+            <input
+              type="checkbox"
+              onClick={event => this.checkboxClicked(event)}
+            />
+          )}
+        </div>
+        <div className="title">{this.props.title}</div>
+      </div>
+    );
+  }
+}
+```
+
+We'll walk through this component too! Starting with the constructor, we set the initial checked state to be what was passed down from the `App` component. The `checkboxClicked` function runs when a checkbox is clicked. This updates the state of this checkbox and then makes a POST request to our `/update-checkmark` API endpoint. Remember this endpoint just toggles the checked state of the checkbox in the `todo_list` variable. In a bigger application, this might update a database, but for now we will just use a variable.
+
+Finally, the render function returns HTML, including a conditional render of a checked or unchecked checkbox. This is how we show two states of the checkbox. Notice that the `onClick()` function passes the click event to the `checkboxClicked` function.
+
+### Checkpoint
+
+At this point our `App.js` file should look something like this.
+
+```
+import React, { Component } from "react";
+import { hot } from "react-hot-loader";
+import "./App.css";
+
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { list: {} };
+  }
+
+  componentDidMount() {
+    fetch("/list")
+      .then(res => {
+        return res.json();
+      })
+      .then(list => {
+        this.setState({ list: list });
+      });
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <h1> TODO LIST </h1>
+
+        {Object.keys(this.state.list).map(key => {
+          return (
+            <CheckBoxItem
+              title={this.state.list[key].title}
+              checked={this.state.list[key].complete}
+              id={key}
+              key={key}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+}
+
+class CheckBoxItem extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { checked: this.props.checked };
+  }
+
+  checkboxClicked(event) {
+    this.setState({ checked: !this.state.checked });
+    // send POST to /update-checkbox/?key={this.props.id}
+    const url = "/update-checkmark/?key=" + this.props.id;
+    fetch(url, {
+      method: "POST"
+    });
+  }
+
+  render() {
+    return (
+      <div className="container">
+        <div className="checkbox">
+          {this.state.checked ? (
+            <input
+              type="checkbox"
+              onClick={event => this.checkboxClicked(event)}
+              checked
+            />
+          ) : (
+            <input
+              type="checkbox"
+              onClick={event => this.checkboxClicked(event)}
+            />
+          )}
+        </div>
+        <div className="title">{this.props.title}</div>
+      </div>
+    );
+  }
+}
+
+export default hot(module)(App);
+```
+
+If everything worked properly, our we should have a todo list with no way to add or delete items, just check/uncheck them.
+
+### Add item
+
+To add an item we will add the following right below our TODO header and above our list wrapper inside our App component.
+
+```
+<div className="new-todo-wrapper">
+  <input
+    className="todo-input"
+    type="text"
+    placeholder="Add new todo..."
+  />
+  <button className="add-todo-btn">Add</button>
+</div>
+```
+
+Add event handlers to the text field and button:
+
+```
+<input
+  className="todo-input"
+  type="text"
+  placeholder="Add new todo..."
+  onChange={() => this.onType(event)}
+  value={this.state.new_title}
+/>
+<button className="add-todo-btn" onClick={() => this.addClicked()}>
+```
+
+And some JavaScript to run when we type or click them, respectively. Put this above your `render()` function in the App component.
+
+```
+onType(event) {
+  this.setState({ new_title: event.target.value });
+}
+addClicked() {
+  if (this.state.new_title === "") {
+    return;
+  }
+  // Update server
+  const url = "/list/?title=" + this.state.new_title;
+  fetch(url, {
+    method: "POST"
+  })
+    .then(res => {
+      return res.json();
+    })
+    .then(list => {
+      this.setState({ list: list, new_title: "" });
+    });
+}
+```
+
+That's it. As you type, we set state inside the App component to store the typed text. When we click Add, we make a POST request to our server updating the todo_list variable, then update our list variable and clear the typed text in our text input.
+
+### Delete item

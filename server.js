@@ -34,8 +34,9 @@ var todo_list = {
   }
 };
 
-app.get("/list", function(req, res) {
-  res.json(todo_list);
+// API calls
+app.get("/list", (req, res) => {
+  res.send(todo_list);
 });
 
 app.post("/list", function(req, res) {
@@ -49,19 +50,19 @@ app.post("/list", function(req, res) {
   };
 
   todo_list[key] = new_item;
-  res.json(new_item);
+  res.send(todo_list);
 });
 
 app.delete("/list", function(req, res) {
   const key = req.query.key;
   delete todo_list[key];
-  res.json(todo_list);
+  res.send(todo_list);
 });
 
 app.post("/update-checkmark", function(req, res) {
   const key = req.query.key;
   todo_list[key]["complete"] = !todo_list[key]["complete"];
-  res.json(todo_list);
+  res.send(todo_list);
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
