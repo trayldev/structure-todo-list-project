@@ -2,9 +2,6 @@
 
 This project was designed to help you build a small React/Express todo list project that you can expend on and deploy to [Structure](https://structure.sh). We will go through setting up React, WebPack, Babel, and Express from scratch. We will build a basic API with Express, which our React project will interact with.
 
-## Borrowed Resources
-
-React Starter Tutorial: https://blog.usejournal.com/creating-a-react-app-from-scratch-f3c693b84658
 
 # Part 1: Basic Hello World React App
 
