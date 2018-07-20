@@ -18,6 +18,16 @@ class App extends Component {
       });
   }
 
+  removeFromList(keyToRemove) {
+    const listWithoutDeletedItem = {};
+    Object.keys(this.state.list).forEach(key => {
+      if (keyToRemove != key) {
+        listWithoutDeletedItem[key] = this.state.list[key];
+      }
+    });
+    this.setState({ list: listWithoutDeletedItem });
+  }
+
   onType(event) {
     this.setState({ new_title: event.target.value });
   }
@@ -63,6 +73,7 @@ class App extends Component {
                   checked={this.state.list[key].complete}
                   id={key}
                   key={key}
+                  removeFromListCallback={() => this.removeFromList(key)}
                 />
               </div>
             );
@@ -88,6 +99,15 @@ class CheckBoxItem extends Component {
     });
   }
 
+  deleteClicked() {
+    const url = "/list/?key=" + this.props.id;
+    fetch(url, {
+      method: "DELETE"
+    }).then(() => {
+      this.props.removeFromListCallback();
+    });
+  }
+
   render() {
     return (
       <div className="container">
@@ -108,6 +128,13 @@ class CheckBoxItem extends Component {
           )}
         </div>
         <div className="title">{this.props.title}</div>
+        <div
+          className="delete-btn"
+          onClick={() => {
+            this.deleteClicked();
+          }}>
+          X
+        </div>
       </div>
     );
   }

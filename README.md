@@ -496,6 +496,102 @@ app.post("/update-checkmark", function(req, res) {
 app.listen(port, () => console.log(`Listening on port ${port}`));
 ```
 
+### React Style
+
+Go ahead and start off by copying this style into your `App.css` file.
+
+```
+html {
+  background-color: lightgreen;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+}
+
+.App {
+  margin: 1rem;
+  padding-top: 30px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.container {
+  display: flex;
+}
+
+.page-title {
+  color: #ffffff;
+  width: 300px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.new-todo-wrapper {
+  width: 430px;
+  height: 40px;
+  display: flex;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.todo-input {
+  height: 100%;
+  width: 80%;
+  border: 0px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  padding-left: 10px;
+  border-bottom-left-radius: 12px;
+  border-top-left-radius: 12px;
+  outline: none;
+}
+
+.add-todo-btn {
+  height: 100%;
+  width: 20%;
+  border: 0px;
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+  background-color: #ffbb91;
+  outline: none;
+}
+
+.todo-list-wrapper {
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  width: 500px;
+  max-height: 70vh;
+  overflow-x: none;
+  overflow-y: scroll;
+}
+
+.todo-item-wrapper {
+  background-color: #ffffff;
+  width: 80%;
+  height: 40px;
+  padding-left: 30px;
+  margin-top: 3px;
+  margin-bottom: 3px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 12px;
+  line-height: 40px;
+}
+
+.title {
+  padding-left: 10px;
+  font-size: 24px;
+}
+
+.delete-btn {
+  position: absolute;
+  right: 50px;
+  line-height: 40px;
+  font-size: 28px;
+}
+```
+
 ### React
 
 Now to the React! Let's start off by updating our App component.
@@ -674,7 +770,7 @@ export default hot(module)(App);
 
 If everything worked properly, our we should have a todo list with no way to add or delete items, just check/uncheck them.
 
-### Add item
+### Add Item
 
 To add an item we will add the following right below our TODO header and above our list wrapper inside our App component.
 
@@ -728,4 +824,222 @@ addClicked() {
 
 That's it. As you type, we set state inside the App component to store the typed text. When we click Add, we make a POST request to our server updating the todo_list variable, then update our list variable and clear the typed text in our text input.
 
-### Delete item
+### Delete Item
+
+Let's add a simple `X` delete button after our title.
+
+```
+<div
+  className="delete-btn"
+  onClick={() => {
+    this.deleteClicked();
+  }}>
+  X
+</div>
+```
+
+Then we'll write `deleteClicked()`.
+
+```
+deleteClicked() {
+  const url = "/list/?key=" + this.props.id;
+  fetch(url, {
+    method: "DELETE"
+  });
+}
+```
+
+What's wrong with this setup? Why doesn't our DOM update when we click that `X` button? The reason is, we haven't updated our list in the App component. To do this, we're going to pass a callback function down from the App component to the CheckBoxItem component. When the X is called and our server responds successfully, we will run this callback and update our list.
+
+In the App component, add this below the `componentDidMount()` function
+
+```
+removeFromList(keyToRemove) {
+  const listWithoutDeletedItem = {};
+  Object.keys(this.state.list).forEach(key => {
+    if (keyToRemove != key) {
+      listWithoutDeletedItem[key] = this.state.list[key];
+    }
+  });
+  this.setState({ list: listWithoutDeletedItem });
+}
+```
+
+And this property to the `<CheckBoxItem />` HTML components
+
+```
+removeFromListCallback={() => this.removeFromList(key)}
+```
+
+We also need to update the CheckBoxItem component function `deleteClicked()`. Go ahead and change the whole funciton to
+
+```
+deleteClicked() {
+  const url = "/list/?key=" + this.props.id;
+  fetch(url, {
+    method: "DELETE"
+  }).then(() => {
+    this.props.removeFromListCallback();
+  });
+}
+```
+
+Your React should now be complete with add, delete, check, and uncheck functionality as well as a great clean UI. Go ahead and try running `npm run dev` if you haven't been to make sure everything looks great!
+
+If you are having any issues, this is what all of your react code should look like.
+
+```
+import React, { Component } from "react";
+import { hot } from "react-hot-loader";
+import "./App.css";
+
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { list: {}, new_title: "" };
+  }
+
+  componentDidMount() {
+    fetch("/list")
+      .then(res => {
+        return res.json();
+      })
+      .then(list => {
+        this.setState({ list: list });
+      });
+  }
+
+  removeFromList(keyToRemove) {
+    const listWithoutDeletedItem = {};
+    Object.keys(this.state.list).forEach(key => {
+      if (keyToRemove != key) {
+        listWithoutDeletedItem[key] = this.state.list[key];
+      }
+    });
+    this.setState({ list: listWithoutDeletedItem });
+  }
+
+  onType(event) {
+    this.setState({ new_title: event.target.value });
+  }
+  addClicked() {
+    if (this.state.new_title === "") {
+      return;
+    }
+    // Update server
+    const url = "/list/?title=" + this.state.new_title;
+    fetch(url, {
+      method: "POST"
+    })
+      .then(res => {
+        return res.json();
+      })
+      .then(list => {
+        this.setState({ list: list, new_title: "" });
+      });
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <h1 className="page-title"> TODO LIST </h1>
+        <div className="new-todo-wrapper">
+          <input
+            className="todo-input"
+            type="text"
+            placeholder="Add new todo..."
+            onChange={() => this.onType(event)}
+            value={this.state.new_title}
+          />
+          <button className="add-todo-btn" onClick={() => this.addClicked()}>
+            Add
+          </button>
+        </div>
+        <div className="todo-list-wrapper">
+          {Object.keys(this.state.list).map(key => {
+            return (
+              <div className="todo-item-wrapper">
+                <CheckBoxItem
+                  title={this.state.list[key].title}
+                  checked={this.state.list[key].complete}
+                  id={key}
+                  key={key}
+                  removeFromListCallback={() => this.removeFromList(key)}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+}
+
+class CheckBoxItem extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { checked: this.props.checked };
+  }
+
+  checkboxClicked(event) {
+    this.setState({ checked: !this.state.checked });
+    // send POST to /update-checkbox/?key={this.props.id}
+    const url = "/update-checkmark/?key=" + this.props.id;
+    fetch(url, {
+      method: "POST"
+    });
+  }
+
+  deleteClicked() {
+    const url = "/list/?key=" + this.props.id;
+    fetch(url, {
+      method: "DELETE"
+    }).then(() => {
+      this.props.removeFromListCallback();
+    });
+  }
+
+  render() {
+    return (
+      <div className="container">
+        <div className="checkbox">
+          {this.state.checked ? (
+            <input
+              type="checkbox"
+              className="checkbox"
+              onClick={event => this.checkboxClicked(event)}
+              checked
+            />
+          ) : (
+            <input
+              type="checkbox"
+              className="checkbox"
+              onClick={event => this.checkboxClicked(event)}
+            />
+          )}
+        </div>
+        <div className="title">{this.props.title}</div>
+        <div
+          className="delete-btn"
+          onClick={() => {
+            this.deleteClicked();
+          }}>
+          X
+        </div>
+      </div>
+    );
+  }
+}
+
+export default hot(module)(App);
+```
+
+## Final Structure deploy
+
+Let's finish off this tutorial by typing `structure deploy todo-list`.
+
+That was easy! Your beautiful app should be running at `https://todo-list-<your-structure-username>.structure.sh/`.
+
+## Contact
+
+If you have any questions regarding the material in this tutorial, feel free to reach out to [Structure](https://structure.sh) at **help@structure.sh**.
