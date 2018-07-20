@@ -2,12 +2,11 @@
 
 This project was designed to help you build a small React/Express todo list project that you can expend on and deploy to [Structure](https://structure.sh). We will go through setting up React, WebPack, Babel, and Express from scratch. We will build a basic API with Express, which our React project will interact with.
 
-
 # Part 1: Basic Hello World React App
 
 ## Environment Setup
 
-Let's start by installing . For this project, our only dependency is [Structure](https://structure.sh).
+Let's start by installing what we need.. For this project, our only dependency is [Structure](https://structure.sh).
 
 ```
 pip install structure
@@ -26,14 +25,14 @@ cd client
 
 Once in our /client (front-end) folder, let's run `npm init`. You can click enter through all of the options for now.
 
-You will see that a `package.json` folder appeared inside /client. You can create a public and src folder now as well.
+You will see that a `package.json` folder appeared inside the /client folder. You can create a public and src folder now as well.
 
 ```
 mkdir public
 mkdir src
 ```
 
-Lastly, let's jump ahead and install all of the packages we will need for the first part of this project. Do so within
+Let's jump ahead and install all of the packages we will need for the first part of this project. Do so with
 
 ```
 // Babel Packages
@@ -41,14 +40,14 @@ npm install --save-dev babel-core babel-cli babel-preset-env babel-preset-react
 // Webpack Packages
 npm install --save-dev webpack webpack-cli webpack-dev-server style-loader css-loader babel-loader
 // React Hot Reloader
-npm install --save react-hot-loader
+npm install --save react-hot-loader react react-dom
 ```
 
 Don't worry about these for now, these packages will be explained more in depth as we use them.
 
 #### HTML
 
-We will put the below html inside a new file called `index.html` inside our /public folder. Note that the line `<div id="root"></div>` is how our React App (we will write this in a moment) is inserting itself into our HTML. The other important line in this file is `<script src="../dist/bundle.js"></script>`. This line includes the bundle.js file that will be built from our project files. More on this later.
+We will put the below html inside a new file called `index.html` inside our /public folder. Note that the line `<div id="root"></div>` is how our React App (we will write this in a moment) is inserting itself into our HTML. The other important line in this file is `<script src="../bundle.js"></script>`. This line includes the bundle.js file that will be built from our project files. More on this later.
 
 ```
 <!DOCTYPE html>
@@ -68,7 +67,7 @@ We will put the below html inside a new file called `index.html` inside our /pub
 </html>
 ```
 
-If you look at your project tree now with `tree -a` it should look something like this.
+If you look at your project tree now with `tree -a` it should look something like this. If you installed your node_modules, the tree will be much larger!
 
 ```
 .
@@ -89,7 +88,7 @@ If you look at your project tree now with `tree -a` it should look something lik
 
 #### Babel
 
-Babel is our next big step. Babel is essentially a translator that will convert our React/JSX code into something the browser can understand and render. Make sure you installed the babel packages in the Environment Setup section.
+Babel is our next big step. Babel is essentially a translator that will convert our React/JSX into something the browser can understand and render (display). Make sure you installed the babel packages in the Environment Setup section, then add this to `.babelrc`.
 
 ```
 {
@@ -140,7 +139,7 @@ module.exports = {
 };
 ```
 
-Find out more about how this works in the [Webpack Docs](https://webpack.js.org/concepts/)
+All you need to know about how this works is in the [Webpack Docs](https://webpack.js.org/concepts/)
 
 #### NPM
 
@@ -170,12 +169,14 @@ Your package.json file should currently look something like this.
     "webpack-dev-server": "^3.1.4"
   },
   "dependencies": {
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
     "react-hot-loader": "^4.3.3"
   }
 }
 ```
 
-We can make the changes below to setup our npm scripts to run our React App (that's next).
+We can make the changes below to setup our npm **scripts** to run our React App (that's next). Go ahead and add the start and build
 
 ```
 {
@@ -250,8 +251,6 @@ This returns a React component with the text "Hello World!" Notice the `export d
 
 **That's it!** We now have a basic react app ready to be run. Go ahead and run `npm start` and checkout `http://localhost:3030`.
 
----
-
 # Part 2: Express Serve Content
 
 ## Express
@@ -264,7 +263,7 @@ The next portion of this tutorial is going to be in the root project folder. Min
 
 Install express with `npm install --save express`
 
-Paste this code into your package.json file in your project directory
+Paste this code into your package.json file in your project directory.
 
 ```
 {
@@ -281,6 +280,8 @@ Paste this code into your package.json file in your project directory
   }
 }
 ```
+
+The scripts in this file are increadibly important, so pay attention to them. If we run `npm start` (which is what Structure will do when we deploy), we run `client` which goes into our client directory and builds our static react app. Then it moves back to the root project folder and starts the node server. Running `npm run dev` does the same thing but on port 5000.
 
 #### Server
 
@@ -307,15 +308,13 @@ app.listen(port, () => console.log(`Listening on port ${port}`));
 
 Now try running `npm run dev` from your project root directory and look at `http://localhost:5000`. You should see your React hello world app running there. In the next section we will work on deploying our React/Express hello world app to [Structure](https://structure.sh).
 
----
-
 # Part 3: Structure Deploy
 
 Now we will deploy to [Structure](https://structure.sh).
 
-Make sure you're already logged into Structure. [Instructions for CLI loggin can be found here](https://docs.structure.sh/getting-started-with-the-cli).
+Make sure you're already logged into Structure. [Instructions for CLI login can be found here](https://docs.structure.sh/getting-started-with-the-cli).
 
-Let's do this by running running
+Let's deploy our app by running
 
 ```
 structure deploy my-todo-list
@@ -325,15 +324,13 @@ If everything worked, you should see your hello world app live at `https://todo-
 
 Something important to note is we did not have to run `npm install` anywhere. When you deploy your project to Structure, the server runs two processes. First it recursively searches your project for package.json files and runs `yarn install` for you. Then it runs `npm start` in your project root directory's `package.json`. Look back at the Express section, specifically our `package.json` we wrote, and note how we wrote our `npm start` command to build the client app then start the server.
 
----
-
 # Part 4: Todo List Development
 
 At this point we have a fully functioning and live React/Express app hosted on Structure. This final part of the tutorial will focus on the development of our Todo list including Express API endpoints and React Components.
 
 ### Express API
 
-We are going to develop API two endpoint with three functions (GET, POST, and DELETE).
+We are going to develop two API endpoints with three functions (GET, POST, and DELETE).
 
 Let's create our mock database. This is just a variable we'll store on our server that will hold stare for our server. Normally this would be done with a database, but for the purpose of this tutorial, we will use a variable.
 
@@ -369,8 +366,8 @@ var todo_list = {
 Next we will create an API endpoint `/list`. This GET endpoint will simply return our `todo_list` object as a json object.
 
 ```
-app.get("/list", function(req, res) {
-  res.json(todo_list);
+app.get("/list", (req, res) => {
+  res.send(todo_list);
 });
 ```
 
@@ -379,7 +376,7 @@ app.get("/list", function(req, res) {
 This API endpoint will create a 8 character random key and store an object for the new item inside our `todo_list` variable.
 
 ```
-app.post("/list", function(req, res) {
+app.post("/list", (req, res) => {
   const key = Math.random()
     .toString(36)
     .substr(2, 9);
@@ -390,7 +387,7 @@ app.post("/list", function(req, res) {
   };
 
   todo_list[key] = new_item;
-  res.json(todo_list);
+  res.send(todo_list);
 });
 ```
 
@@ -399,10 +396,10 @@ app.post("/list", function(req, res) {
 This API endpoint will get the key of the item we are trying to delete and remove it from the `todo_list` object.
 
 ```
-app.delete("/list", function(req, res) {
+app.delete("/list", (req, res) => {
   const key = req.query.key;
   delete todo_list[key];
-  res.json(todo_list);
+  res.send(todo_list);
 });
 ```
 
@@ -411,10 +408,10 @@ app.delete("/list", function(req, res) {
 This API endpoint flips the state of a checkbox.
 
 ```
-app.post("/update-checkmark", function(req, res) {
+app.post("/update-checkmark", (req, res) => {
   const key = req.query.key;
   todo_list[key]["complete"] = !todo_list[key]["complete"];
-  res.json(todo_list);
+  res.send(todo_list);
 });
 ```
 
@@ -464,7 +461,7 @@ app.get("/list", (req, res) => {
   res.send(todo_list);
 });
 
-app.post("/list", function(req, res) {
+app.post("/list", (req, res) => {
   const key = Math.random()
     .toString(36)
     .substr(2, 9);
@@ -475,16 +472,16 @@ app.post("/list", function(req, res) {
   };
 
   todo_list[key] = new_item;
-  res.send(new_item);
+  res.send(todo_list);
 });
 
-app.delete("/list", function(req, res) {
+app.delete("/list", (req, res) => {
   const key = req.query.key;
   delete todo_list[key];
   res.send(todo_list);
 });
 
-app.post("/update-checkmark", function(req, res) {
+app.post("/update-checkmark", (req, res) => {
   const key = req.query.key;
   todo_list[key]["complete"] = !todo_list[key]["complete"];
   res.send(todo_list);
@@ -631,7 +628,7 @@ class App extends Component {
 }
 ```
 
-What is this doing? Essentially, our `constructor` set's our component's state with an empty object called list. Then our `componentDidMount()` makes a request to our server asking for the the JSON object that the `/list` API endpoint returns. Finally, our render function displays some basic HTML. It also uses that `Object.keys()` function to get a list of keys in our list object (the ids of all the list items) and uses the `map` function to loop through those keys and return a `CheckBoxItem` for each key. We will create the CheckBoxItem component next. Notice that we pass the title, checked status, and id value as props down to our `CheckBoxItem`. The `key` word is used whenever we map through a list so the browser can differentiate between items in lists (helpful for browser accessibility tools like page readers).
+What is this doing? Essentially, our `constructor` sets our component's state with an empty object called list. Then our `componentDidMount()` makes a request to our server asking for the the JSON object that the `/list` API endpoint returns. Finally, our render function displays some basic HTML. It also uses the `Object.keys()` function to get a list of keys in our list object (the ids of all the list items) and uses the `map` function to loop through those keys and return a `CheckBoxItem` for each key. We will create the CheckBoxItem component next. Notice that we pass the title, checked status, and id value as props down to our `CheckBoxItem`. The `key` word is used whenever we map through a list so the browser can differentiate between items in lists (helpful for browser accessibility tools like page readers).
 
 Next, let's create a component called CheckBoxItem. This will be a checkbox displayed next to a title for each todo item.
 

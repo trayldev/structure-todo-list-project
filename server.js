@@ -39,7 +39,7 @@ app.get("/list", (req, res) => {
   res.send(todo_list);
 });
 
-app.post("/list", function(req, res) {
+app.post("/list", (req, res) => {
   const key = Math.random()
     .toString(36)
     .substr(2, 9);
@@ -53,13 +53,13 @@ app.post("/list", function(req, res) {
   res.send(todo_list);
 });
 
-app.delete("/list", function(req, res) {
+app.delete("/list", (req, res) => {
   const key = req.query.key;
   delete todo_list[key];
   res.send(todo_list);
 });
 
-app.post("/update-checkmark", function(req, res) {
+app.post("/update-checkmark", (req, res) => {
   const key = req.query.key;
   todo_list[key]["complete"] = !todo_list[key]["complete"];
   res.send(todo_list);
