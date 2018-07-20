@@ -762,11 +762,11 @@ class CheckBoxItem extends Component {
 export default hot(module)(App);
 ```
 
-If everything worked properly, our we should have a todo list with no way to add or delete items, just check/uncheck them.
+If everything worked properly, we should have a todo list with no way to add or delete items, just check/uncheck them. Go ahead and run `npm run dev` in the project root directory and checkout out at `localhost:5000`.
 
 ### Add Item
 
-To add an item we will add the following right below our TODO header and above our list wrapper inside our App component.
+To add an item we will add the following right below our todo header and above our list wrapper inside our App component.
 
 ```
 <div className="new-todo-wrapper">
@@ -859,13 +859,13 @@ removeFromList(keyToRemove) {
 }
 ```
 
-And this property to the `<CheckBoxItem />` HTML components
+And this property to the `<CheckBoxItem />` HTML components in the `.map()` in App.
 
 ```
 removeFromListCallback={() => this.removeFromList(key)}
 ```
 
-We also need to update the CheckBoxItem component function `deleteClicked()`. Go ahead and change the whole funciton to
+We also need to update the CheckBoxItem component function `deleteClicked()`. Go ahead and change the whole function to
 
 ```
 deleteClicked() {
@@ -878,7 +878,7 @@ deleteClicked() {
 }
 ```
 
-Your React should now be complete with add, delete, check, and uncheck functionality as well as a great clean UI. Go ahead and try running `npm run dev` if you haven't been to make sure everything looks great!
+Your React should now be complete with add, delete, check, and uncheck functionality as well as a clean UI. Go ahead and try running `npm run dev` if you haven't been to make sure everything looks great!
 
 If you are having any issues, this is what all of your react code should look like.
 
